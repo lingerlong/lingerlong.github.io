@@ -12,7 +12,7 @@
 <script>
 /* ==== НАСТРОЙКИ САЙТА (меняются здесь или подставляются из таблицы при запуске через Apps Script) ==== */
 window.LL_CONFIG = /*LL_CONFIG*/{
-  version: "2.0 · 13.11.2026",
+  version: "2.1 · 22.11.2026",
   issue: "Бенгальские огни",
   formUrl: "https://docs.google.com/forms/d/e/1FAIpQLSfl9A2kKh90YJPavExC8kvuNFZgUAOiYmM-r0qobk-xPKUlFg/viewform",
   botUsername: "",
@@ -29,7 +29,7 @@ window.LL_CONFIG = /*LL_CONFIG*/{
   maxPages: 5,
   contactMain: "@yuliyakobyzeva",
   contactTech: "@artiechoke",
-  instagram: "@lingerlongmagazine",
+  instagram: "@lingerlong.art",
   operator: "Медюхо Юлия Валерьевна, автор проекта Linger Long",
   deadlines: [
     ["2026-11-22", "Приём заявок", "Заполнить анкету после прочтения правил. Одобренные участники получают папку, ссылку на группу и бота."],
@@ -44,7 +44,7 @@ window.LL_CONFIG = /*LL_CONFIG*/{
 }/*END_LL_CONFIG*/;
 </script>
 <style>
-/* Макет: журнальная полоса — жёлтая обложка-шапка, далее «листы» разделов с карандашными пометками [ ] и пилюлями; справа на десктопе липкий счётчик прочтения. */
+/* Макет: книжная полоса — жёлтая обложка-шапка, далее «листы» разделов с карандашными пометками [ ] и пилюлями; справа на десктопе липкий счётчик прочтения. */
 :root{
   --paper:#FADE70;      /* фирменный жёлтый */
   --sheet:#FFF8DC;      /* лист внутри */
@@ -267,18 +267,32 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-bet
   .tl li::after{left:2px}
   .tl time{text-align:left}
 }
+/* неприметное окошко в шапке: вход постоянных участников по кодовому слову */
+.cover .wrap{position:relative}
+.quiet{position:absolute;top:-20px;right:max(16px,env(safe-area-inset-right,0px));margin:0;z-index:2}
+.quiet input{display:block;width:96px;height:26px;padding:2px 8px;font:400 14px/1 var(--serif);color:var(--ink);background:transparent;border:1px solid color-mix(in srgb,var(--ink) 28%,transparent);border-radius:6px;opacity:.6;transition:opacity .2s,border-color .2s}
+.quiet input:hover,.quiet input:focus{opacity:1;border-color:var(--ink);outline:none}
+.quiet.busy input{opacity:.35}
+.quiet.no input{animation:qshake .35s}
+@keyframes qshake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.regbar{margin-top:22px;border:2px solid var(--ink);border-radius:8px;background:var(--pink);color:#111;padding:12px 16px;box-shadow:5px 5px 0 var(--ink)}
+.regbar .linkbtn{text-decoration-color:#111;white-space:nowrap}
+body:not(.is-reg) .only-reg{display:none!important}
+body.is-reg .only-std{display:none!important}
+.nick a,footer a{text-decoration-thickness:2px}
 </style>
 </head>
 <body>
 
 <header class="cover">
   <div class="wrap">
+    <form class="quiet" id="quietForm" autocomplete="off"><input id="quietIn" type="text" aria-label="Кодовое слово" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go" maxlength="40"></form>
     <div class="mast" aria-label="Linger long"><span class="slab">LINGER</span><span class="script">long</span></div>
     <div class="handle" id="handle">летопись творца современности · альбом для участников</div>
     <div class="cover-grid">
       <div>
         <h1 id="issueTitle">Бенгальские огни</h1>
-        <p class="lede">Здесь всё, что нужно знать до заявки: сколько стоит участие, что и когда прислать, какие нужны фото и как устроены оплата и доставка. Прочитайте разделы, отметьте каждый — и в конце откроется анкета.</p>
+        <p class="lede">Здесь всё, что нужно знать до заявки: сколько стоит участие, что и когда прислать, какие нужны фото и как устроены оплата и доставка. Прочитайте каждый раздел и нажмите под ним кнопку «Прочитано». Когда отмечены все разделы, в конце страницы откроется анкета.</p>
       </div>
       <div class="cover-note">
         <div class="price-stamp">
@@ -291,7 +305,11 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-bet
   </div>
 </header>
 
-<section class="choose" aria-label="Что вы хотите">
+<div class="wrap only-reg" id="regBar">
+  <div class="regbar"><b id="regBarHello">Здравствуйте!</b> Вы вошли как постоянный участник. Условия участия те же, что у всех участников, отличается только стоимость — она в разделе 4. Нажмите «Прочитано» под каждым разделом, и в конце откроется ваша анкета. <button type="button" class="linkbtn" id="regBarOut">Выйти</button></div>
+</div>
+
+<section class="choose" aria-label="Что вы хотите" hidden>
   <div class="wrap">
     <div class="choose-grid">
       <button type="button" class="path" id="pathAuthor" aria-pressed="true"><b>Хочу стать участником</b><span>Свои страницы в альбоме: стихи, история, работы. Правила, стоимость, сроки, анкета.</span><span class="go">к правилам →</span></button>
@@ -348,7 +366,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-bet
       <h2>Что такое Linger Long</h2>
       <p>Linger Long — творческий проект: мы делаем коллективные книги-альбомы о людях, которые создают. У каждого участника в альбоме свои страницы: портрет, рассказ о себе, тексты, стихи с QR-кодом на авторское прочтение, фото и иллюстрации.</p>
       <p>Альбом делается по заказу участников и только для них. Экземпляры получают участники, в открытую продажу альбом не поступает. Сколько экземпляров заказано, столько и печатается.</p>
-      <div class="note">Вся работа над альбомом идёт в трёх местах: <b>анкета</b> (заявка), <b>личная папка на Google Диске</b> (материалы) и <b>Telegram-бот + группа участников</b> (статус, оплата, новости). В личные сообщения материалы не присылаем.</div>
+      <div class="note">Вся работа над альбомом идёт в трёх местах: <b>анкета</b> (заявка), <b>личная папка на Google Диске</b> (материалы) и <b>Telegram-бот + группа участников</b> (статус, оплата, новости).</div>
       <div class="read"><button type="button" aria-pressed="false">Прочитано</button></div>
     </section>
 
@@ -358,14 +376,13 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-bet
       <h2>Что входит в участие</h2>
       <p>Стоимость участия — это оплата нашей работы над вашими страницами и изготовления ваших экземпляров. В неё входит всё перечисленное ниже.</p>
       <ul class="perks">
-        <li><b>Печатный альбом</b>Ваш экземпляр из типографии, при 3+ страницах — два.</li>
+        <li><b>Печатный альбом</b>Ваш экземпляр из типографии<span class="only-std">, при 3+ страницах — два</span>.</li>
         <li><b>Электронная версия</b>PDF всего альбома после его выхода. Его получают только участники; кому показать или переслать файл, каждый участник решает сам.</li>
-        <li><b>Портрет студийного качества</b>Нет профессионального фото — сделаем портрет с помощью ИИ по вашим обычным снимкам. Печатаем только с вашего согласия, отмеченного в анкете.</li>
+        <li><b>Портрет студийного качества</b>Нет профессионального фото — сделаем портрет с помощью ИИ по вашим обычным снимкам. Размещаем в альбоме только с вашего одобрения.</li>
         <li><b>QR-видео на вашей странице</b>Ваши стихи или рассказ в авторском прочтении под музыку, созданную специально для этого видео, с художественным видеорядом в своём стиле для каждого участника.</li>
         <li><b>QR на ваш профиль</b>Тот, кто откроет альбом, в один клик попадает в ваш Instagram или Telegram.</li>
-        <li><b>Обучение работе с ИИ</b>Как самому делать фото и видео в нейросетях бесплатно — без покупки аккаунтов и подписок. Пошаговые инструкции и готовые промпты.</li>
         <li><b>Дизайн и вёрстка</b>Страницы в стиле альбома делает команда проекта, текст проходит корректуру.</li>
-        <li><b>Продвижение</b>Совместные публикации с <span data-k="instagram">@lingerlongmagazine</span>, рилс о вашем участии, готовые идеи и тексты для анонсов и анпакинга.</li>
+        <li><b>Продвижение</b>Совместные публикации с Instagram проекта <a data-k="instagram" href="https://www.instagram.com/lingerlong.art/" target="_blank" rel="noopener">@lingerlong.art</a>, рилс о вашем участии, готовые идеи и тексты для анонсов и анпакинга.</li>
         <li><b>Сообщество</b>Группа участников, знакомства с творцами со всей Беларуси, совместные проекты.</li>
         <li><b>Личный бот и папка</b>Статус материалов, напоминания о сроках, превью и трек-номер — всё в одном месте.</li>
       </ul>
@@ -382,11 +399,13 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-bet
         <li><b>Анкета</b>Заполняете анкету: контакты, роль, объём, доставка, согласия.</li>
         <li><b>Одобрение</b>Мы рассматриваем заявку в течение 3 дней.</li>
         <li><b>Папка и группа</b>На почту приходит личная папка, ссылка на группу участников и на бота.</li>
+        <li><b>Интервью</b>Мы готовим вопросы лично для вас и присылаем ссылку на страницу интервью. К каждому вопросу там есть подсказки.</li>
         <li><b>Материалы</b>Загружаете тексты, аудио, фото — по папкам и в срок.</li>
         <li><b>Превью</b>Смотрите свои страницы, присылаете правки один раз.</li>
         <li><b>Оплата</b>Бот присылает сумму за утверждённое число страниц. Платите и отправляете чек боту.</li>
         <li><b>Печать и доставка</b>Трек-номер приходит в бот, альбом — в ваше отделение.</li>
       </ol>
+      <div class="note" id="ivNote"><b>Как проходит интервью.</b> После одобрения заявки мы знакомимся с вашим творчеством и составляем вопросы именно для вас. Вы получаете личную ссылку на страницу интервью: вопросы открываются по одному, рядом с каждым есть подсказки — с чего начать и какую деталь вспомнить. Нажмите «Подсказать» или просто сделайте паузу, и подсказка появится сама. Подсказки только помогают: в альбом попадают ваши слова. Черновик сохраняется на вашем устройстве, отвечать можно в несколько заходов по той же ссылке. Отдельный файл с ответами присылать не нужно. Ссылка личная — не пересылайте её другим.</div>
       <div class="read"><button type="button" aria-pressed="false">Прочитано</button></div>
     </section>
 
@@ -394,13 +413,22 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-bet
       <span class="tape" aria-hidden="true"></span>
       <span class="bracket">раздел 4</span>
       <h2>Стоимость участия</h2>
+      <div class="only-reg">
+        <p><b>Для постоянных участников стоимость фиксированная</b> — сколько бы страниц вы ни заняли.</p>
+        <div class="regprice">
+          <div><b><span data-k="priceRegular">78</span> BYN</b><span>участие, до <span data-k="maxPages">5</span> страниц</span></div>
+          <div><b>+<span data-k="deliveryEuropost">7</span> BYN</b><span>отправка Европочтой</span></div>
+          <div><b id="regTotal2">85 BYN</b><span>итого, <span data-k="pricePage">9</span> BYN за страницу не берутся</span></div>
+        </div>
+        <p>Без доплаты за страницы и без обязательного второго экземпляра.</p>
+      </div>
       <ul>
-        <li>Экземпляр альбома стоит <b data-k="priceCopy">78</b> BYN.</li>
-        <li>Каждая ваша страница — <b data-k="pricePage">9</b> BYN.</li>
-        <li>Если у вас <b data-k="pagesForTwoCopies">3</b> страницы и больше, заказываются <b>два экземпляра</b> (второй — обязательный).</li>
+        <li class="only-std">Экземпляр альбома стоит <b data-k="priceCopy">78</b> BYN.</li>
+        <li class="only-std">Каждая ваша страница — <b data-k="pricePage">9</b> BYN.</li>
+        <li class="only-std">Если у вас <b data-k="pagesForTwoCopies">3</b> страницы и больше, заказываются <b>два экземпляра</b> (второй — обязательный).</li>
         <li>Максимум <b data-k="maxPages">5</b> страниц на одного участника в альбоме.</li>
         <li>Доставка оплачивается отдельно: Европочта по Беларуси — <b data-k="deliveryEuropost">7</b> BYN за посылку (добавляется к сумме), Белпочта — по тарифу службы. Экземпляры отправляем только по Беларуси.</li>
-        <li>Дополнительные экземпляры — для себя, родных и друзей — заказываются в анкете до сдачи альбома в печать. Все ваши экземпляры отправляются на ваш адрес.</li>
+        <li>Дополнительные экземпляры — для себя, родных и друзей — заказываются в анкете до сдачи альбома в печать<span class="only-reg">, каждый — <span data-k="priceCopy">78</span> BYN</span>. Все ваши экземпляры отправляются на ваш адрес.</li>
         <li>Окончательное число страниц определяет вёрстка. Сумму вы получаете в боте после согласования превью — до этого ничего платить не нужно.</li>
       </ul>
       <div class="calc" aria-label="Калькулятор стоимости">
@@ -422,8 +450,8 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-bet
           <div class="total"><span>Итого</span><b id="rcTotal">0</b></div>
         </div>
       </div>
-      <h3>Таблица для быстрого взгляда</h3>
-      <div class="scroll"><table class="ptable" id="ptable"><thead><tr><th>Страниц</th><th>Экземпляров</th><th>Расчёт</th><th>Стоимость без доставки, BYN</th></tr></thead><tbody></tbody></table></div>
+      <h3 class="only-std">Таблица для быстрого взгляда</h3>
+      <div class="scroll only-std"><table class="ptable" id="ptable"><thead><tr><th>Страниц</th><th>Экземпляров</th><th>Расчёт</th><th>Стоимость без доставки, BYN</th></tr></thead><tbody></tbody></table></div>
       <div class="note">Банковская комиссия оплачивается отправителем. На наш счёт должна прийти ровно сумма из бота.</div>
       <div class="read"><button type="button" aria-pressed="false">Прочитано</button></div>
     </section>
@@ -434,7 +462,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-bet
       <h2>Сроки</h2>
       <p>Даты жёсткие: макет собирается по мере поступления материалов, типография ждёт файл в срок.</p>
       <ol class="tl" id="tl"></ol>
-      <div class="note red">Материалы, присланные после срока, в альбом не попадают. Если не успеваете — напишите заранее, мы поможем перестроить план.</div>
+      <div class="note red">Материалы, присланные после срока, в альбом не попадают. Если не успеваете — напишите заранее в Telegram: <a data-k="contactMain" href="https://t.me/yuliyakobyzeva" target="_blank" rel="noopener">@yuliyakobyzeva</a>, мы поможем перестроить план.</div>
       <div class="read"><button type="button" aria-pressed="false">Прочитано</button></div>
     </section>
 
@@ -466,7 +494,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-bet
       <span class="tape" aria-hidden="true"></span>
       <span class="bracket">раздел 7</span>
       <h2>Фото надлежащего качества</h2>
-      <p>Фото печатается на бумаге, поэтому слабые снимки видны сразу. Нужен <b>один портрет по грудь</b>. Другие фото — ваши работы, процесс, атмосфера — по желанию.</p>
+      <p>Нужен <b>один портрет по грудь</b>. Другие фото — ваши работы, процесс, атмосфера — по желанию.</p>
       <div class="dodont">
         <div class="frame good"><div class="pic light"><span class="mark" aria-hidden="true">✓</span><div class="person" style="--cloth:#3b4a6b"></div></div>
           <div class="cap"><b>Так</b><br>Светлый однотонный фон, дневной свет из окна, кадр по грудь, взгляд в камеру, лёгкая улыбка.</div></div>
@@ -484,7 +512,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-bet
         <li>Кадр по грудь: голова и плечи целиком, над головой немного воздуха.</li>
         <li>На дополнительных фото — без чужих людей в кадре или с их согласия.</li>
       </ul>
-      <div class="note">Нет подходящего фото? Напишите Артёму <b class="nick" data-k="contactTech">@artiechoke</b>: по 3–5 вашим обычным фото мы сделаем портрет в нейросети и пришлём на одобрение. Без вашего «да» такое фото не печатается.</div>
+      <div class="note">Нет подходящего фото? Напишите Артёму в Telegram: <b class="nick"><a data-k="contactTech" href="https://t.me/artiechoke" target="_blank" rel="noopener">@artiechoke</a></b>. По 3–5 вашим обычным фото мы сделаем портрет в нейросети и пришлём на одобрение. Без вашего «да» такое фото в альбоме не размещается.</div>
       <div class="read"><button type="button" aria-pressed="false">Прочитано</button></div>
     </section>
 
@@ -529,7 +557,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-bet
         <li>Правим только текст и фото. Дизайн и вёрстку определяет команда проекта.</li>
         <li>Один раунд правок: всё одним файлом в «07 Правки» до дедлайна. Правки не должны менять объём текста.</li>
         <li>Макеты, скрины страниц и QR-видео не публикуем до выхода альбома — дня, когда первый участник получит свой экземпляр. До этого можно анонсировать участие и показывать процесс с размытым макетом.</li>
-        <li>После выхода — совместные посты с <b class="nick" data-k="instagram">@lingerlongmagazine</b>, рилсы и анпакинг. Идеи и тексты мы подготовим.</li>
+        <li>После выхода — совместные посты с Instagram проекта <b class="nick"><a data-k="instagram" href="https://www.instagram.com/lingerlong.art/" target="_blank" rel="noopener">@lingerlong.art</a></b>, рилсы и анпакинг. Идеи и тексты мы подготовим.</li>
       </ul>
       <div class="read"><button type="button" aria-pressed="false">Прочитано</button></div>
     </section>
@@ -543,8 +571,8 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-bet
         <li>Платите только после того, как бот прислал сумму и реквизиты. Реквизиты публично не размещаются.</li>
         <li>Удобнее всего — ЕРИП «Пополнение счёта» по реквизитам из бота: обычно без комиссии.</li>
         <li>После оплаты отправьте боту чек (скрин или PDF) и нажмите «Чек об оплате». Мы подтвердим оплату, бот сообщит.</li>
-        <li>В назначении платежа или комментарии к переводу напишите: <b>«Оплата услуг по дизайну страниц альбома, Фамилия И.»</b>. Формулировка одна для всех участников. Если такого поля в форме оплаты нет — ничего страшного.</li>
-        <li>На оплату вы получаете чек из приложения «Налог на профессиональный доход».</li>
+        <li>В назначении платежа или комментарии к переводу напишите: <b>«Оплата услуг по дизайну страниц альбома, Фамилия Имя»</b> — подставьте свои фамилию и имя полностью. Формулировка одна для всех участников. Если такого поля в форме оплаты нет — ничего страшного.</li>
+        <li>После оплаты вы получаете чек.</li>
         <li>Один участник — один платёж. Если платит другой человек, укажите это при отправке чека.</li>
         <li>Без подтверждённой оплаты в срок страницы участника в альбом не входят.</li>
       </ul>
@@ -574,7 +602,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-bet
       <h3>Авторские права</h3>
       <p>Автор сохраняет все права на свои произведения (Закон Республики Беларусь «Об авторском праве и смежных правах» от 17.05.2011 № 262-З). Заполняя анкету, автор безвозмездно предоставляет проекту простую (неисключительную) лицензию сроком на 5 лет без ограничения территории: воспроизвести материалы в печатном альбоме, включая допечатку экземпляров для участников, в превью и в электронной версии (PDF) альбома, которую получают только участники и которой каждый из них распоряжается сам, в видео для QR-кода, размещённом в интернете по ссылке, и фрагментами в соцсетях проекта для рассказа об альбоме. Корректура и вёрстка допускаются, изменения смысла — только с согласия автора.</p>
       <p>Участник, который читает стихи или рассказ, разрешает записать своё исполнение, смонтировать видео и разместить его в интернете по ссылке из QR-кода. Портрет, созданный нейросетью, печатается только при отдельном согласии в анкете. Музыка для видео создаётся специально для проекта, чужие записи не используются.</p>
-      <p>Автор гарантирует, что материалы созданы им или у него есть права на них, что у него есть разрешение фотографа на использование снимков и согласие людей на фото. Имя фотографа указывается в анкете. Материалы не должны нарушать законодательство Республики Беларусь и права третьих лиц; рекламу третьих лиц не размещаем.</p>
+      <p>Автор гарантирует, что материалы созданы им или у него есть права на них, что у него есть разрешение фотографа на использование снимков и согласие людей на фото. Имя и фамилия фотографа указываются в анкете. Материалы не должны нарушать законодательство Республики Беларусь и права третьих лиц; рекламу третьих лиц не размещаем.</p>
       <h3>Персональные данные</h3>
       <p>Оператор персональных данных — <span id="operator">Медюхо Юлия Валерьевна, автор проекта Linger Long</span>. Данные обрабатываются на основании согласия в соответствии с Законом Республики Беларусь «О защите персональных данных» от 07.05.2021 № 99-З.</p>
       <ul>
@@ -584,7 +612,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-bet
         <li><b>Кому передаются:</b> типографии — макет альбома; службам доставки (Европочта, Белпочта) — ФИО, телефон и адрес получателя.</li>
         <li><b>Где хранятся:</b> Google Диск, Google Таблицы и Google Формы (Google LLC, США) и Telegram. Это трансграничная передача данных в страны, где может не обеспечиваться надлежащий уровень защиты прав субъектов персональных данных. Риски: данные могут стать доступны иностранным органам, а защита ваших прав может быть затруднена. Заполняя анкету, вы подтверждаете, что проинформированы об этих рисках (ст. 9 Закона № 99-З).</li>
         <li><b>Срок:</b> до окончания работы над альбомом и 3 года после его выхода (для учёта оплат), затем данные удаляются. Напечатанные экземпляры остаются у участников.</li>
-        <li><b>Ваши права:</b> узнать, какие данные обрабатываются, исправить их, отозвать согласие и потребовать удаления — напишите <b class="nick" data-k="contactMain">@yuliyakobyzeva</b>. Отзыв согласия не затрагивает уже напечатанные экземпляры.</li>
+        <li><b>Ваши права:</b> узнать, какие данные обрабатываются, исправить их, отозвать согласие и потребовать удаления — напишите в Telegram: <b class="nick"><a data-k="contactMain" href="https://t.me/yuliyakobyzeva" target="_blank" rel="noopener">@yuliyakobyzeva</a></b>. Отзыв согласия не затрагивает уже напечатанные экземпляры.</li>
         <li>Участники младше 18 лет — только с письменного согласия родителя или другого законного представителя. Форму согласия пришлём после заявки.</li>
       </ul>
       <p class="muted">Раздел составлен в информационных целях и не является юридической консультацией.</p>
@@ -594,13 +622,13 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-bet
     <section class="final" id="agree" aria-labelledby="agreeH">
       <span class="bracket" style="color:inherit;opacity:.7">последний шаг</span>
       <h2 id="agreeH">Я изучил(а) правила</h2>
-      <p id="agreeHint" class="muted">Отметьте «Прочитано» во всех разделах — тогда галочка станет доступна.</p>
+      <p id="agreeHint" class="muted">Нажмите «Прочитано» под каждым разделом — тогда галочка станет доступна.</p>
       <label class="agree locked" id="agreeLbl"><input type="checkbox" id="agreeBox" disabled> <span>Я прочитал(а) все правила для участников Linger Long, согласен(на) с условиями участия, порядком оплаты и обработкой персональных данных.</span></label>
       <button class="cta" id="agreeBtn" type="button" disabled>Я изучил(а) все правила</button>
       <div class="success" id="success" hidden>
-        <p><b>Спасибо!</b> Правила приняты <span id="acceptedAt"></span>. Теперь заполните анкету — после одобрения придут ссылки на папку, группу участников и бота.</p>
+        <p><b>Спасибо!</b> Правила приняты <span id="acceptedAt"></span>. <span class="only-std">Теперь заполните анкету — после одобрения придут ссылки на папку, группу участников и бота.</span><span class="only-reg">Открываю анкету постоянного участника — фамилия, имя и кодовое слово в ней уже вписаны.</span></p>
         <a class="btn" id="formLink" href="#" target="_top" rel="noopener">Заполнить анкету</a>
-        <p class="muted" id="formMissing" hidden>Анкета откроется здесь после запуска набора. Пока можно написать <span data-k="contactMain">@yuliyakobyzeva</span>.</p>
+        <p class="muted" id="formMissing" hidden>Анкета откроется здесь после запуска набора. Пока можно написать в Telegram: <a data-k="contactMain" href="https://t.me/yuliyakobyzeva" target="_blank" rel="noopener">@yuliyakobyzeva</a>.</p>
       </div>
     </section>
   </main>
@@ -617,9 +645,9 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-bet
 
 <footer>
   <div class="wrap">
-    <div>Организационные вопросы: <b data-k="contactMain">@yuliyakobyzeva</b> <button class="copy" type="button" data-copy="contactMain">копировать</button></div>
-    <div>Фото, файлы, техника: <b data-k="contactTech">@artiechoke</b> <button class="copy" type="button" data-copy="contactTech">копировать</button></div>
-    <div class="muted">Linger Long · <span data-k="instagram">@lingerlongmagazine</span> · правила v<span id="ver2"></span></div>
+    <div>Организационные вопросы — в Telegram: <b><a data-k="contactMain" href="https://t.me/yuliyakobyzeva" target="_blank" rel="noopener">@yuliyakobyzeva</a></b> <button class="copy" type="button" data-copy="contactMain">копировать</button></div>
+    <div>Фото, файлы, техника — в Telegram: <b><a data-k="contactTech" href="https://t.me/artiechoke" target="_blank" rel="noopener">@artiechoke</a></b> <button class="copy" type="button" data-copy="contactTech">копировать</button></div>
+    <div class="muted">Linger Long · Instagram <a data-k="instagram" href="https://www.instagram.com/lingerlong.art/" target="_blank" rel="noopener">@lingerlong.art</a> · правила v<span id="ver2"></span></div>
   </div>
 </footer>
 
@@ -642,23 +670,14 @@ function boot(C){
   var store = {get:function(k){try{return localStorage.getItem(k)}catch(e){return null}}, set:function(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
   var KEY = 'll-rules-' + (C.version||'1');
 
-  // ── выбор: участник / постоянный участник ──
-  var MODE_KEY = 'll-mode';
-  var VIEWS = {author:'#authorView', reg:'#regView'}, PATHS = {author:'#pathAuthor', reg:'#pathRegular'};
-  function setMode(m, scroll){
-    if (!VIEWS[m]) m = 'author';
-    Object.keys(VIEWS).forEach(function(k){ $(VIEWS[k]).hidden = k !== m; $(PATHS[k]).setAttribute('aria-pressed', k === m ? 'true':'false'); });
-    store.set(MODE_KEY, m);
-    if (scroll) $(VIEWS[m]).scrollIntoView({behavior:'smooth', block:'start'});
-    if (m === 'reg' && !regOpen) setTimeout(function(){ try{ $('#sIn').focus({preventScroll:true}); }catch(e){} }, 300);
-  }
-  var regOpen = false;
-  $('#pathAuthor').addEventListener('click', function(){ setMode('author', true); });
-  $('#pathRegular').addEventListener('click', function(){ setMode('reg', true); });
-  $('#toAuthor2').addEventListener('click', function(){ setMode('author', true); });
-  $('#toRules').addEventListener('click', function(){ setMode('author', true); });
-  if (C.hasRegular === false) $('#pathRegular').hidden = true;
-  setMode(store.get(MODE_KEY) || 'author', false);
+  // ── кнопки выбора «участник / постоянный участник» скрыты (22.11.2026): правила всегда на виду,
+  //    постоянные участники входят кодовым словом через неприметное окошко в шапке (см. конец скрипта) ──
+  var regOpen = false, REG = null; // REG — ответ сервера о постоянном участнике (имя, ссылка на его анкету)
+  function setMode(){ $('#authorView').hidden = false; $('#regView').hidden = true; }
+  try { localStorage.removeItem('ll-mode'); } catch(e){}
+  setMode();
+  if (C.hasRegular === false) $('#quietForm').hidden = true;
+  function RK(){ return KEY + (REG ? '-reg' : ''); } // отметки «Прочитано» у постоянных участников свои
 
   // ── постоянные авторы: фамилия, имя и личное кодовое слово ──
   var CRED_KEY = 'll-reg-who';
@@ -708,13 +727,20 @@ function boot(C){
   });
   // подстановка настроек
   $$('[data-k]').forEach(function(el){ if(C[el.dataset.k]!=null) el.textContent = C[el.dataset.k]; });
+  // ники — ссылками: контакты ведут в Telegram, аккаунт проекта — в Instagram
+  $$('a[data-k]').forEach(function(el){ var k = el.dataset.k, v = String(C[k]||'').replace(/^@/,''); if (!v) return;
+    if (k === 'instagram') el.href = 'https://www.instagram.com/' + encodeURIComponent(v) + '/';
+    else if (k === 'contactMain' || k === 'contactTech') el.href = 'https://t.me/' + encodeURIComponent(v); });
   if ($('#ver2')) $('#ver2').textContent = C.version;
   $('#issueTitle').textContent = C.issue;
   $('#operator').textContent = C.operator;
   $('#stampPrice').textContent = C.priceCopy + ' BYN';
-  $('#stampNote').textContent = '+ ' + C.pricePage + ' BYN за каждую вашу страницу. От ' + C.pagesForTwoCopies + ' страниц — два экземпляра. Максимум ' + C.maxPages + ' страниц.';
+  function setStamp(){ $('#stampNote').textContent = REG
+    ? 'Фиксированная стоимость для постоянных участников: до ' + C.maxPages + ' страниц, без доплаты за страницы. Доставка отдельно.'
+    : '+ ' + C.pricePage + ' BYN за каждую вашу страницу. От ' + C.pagesForTwoCopies + ' страниц — два экземпляра. Максимум ' + C.maxPages + ' страниц.'; }
+  setStamp();
   document.title = 'Linger Long · Правила для участников · ' + C.issue;
-  $('#regTotal').textContent = ((C.priceRegular||C.priceCopy) + (C.deliveryEuropost||0)) + ' BYN';
+  $('#regTotal').textContent = $('#regTotal2').textContent = ((C.priceRegular||C.priceCopy) + (C.deliveryEuropost||0)) + ' BYN';
 
   // цена
   function price(pages, extra, regular){
@@ -773,7 +799,7 @@ function boot(C){
     btn.addEventListener('click', function(){ setRead(s, btn.getAttribute('aria-pressed')!=='true'); persist(); });
   });
   function setRead(s,on){ var btn=$('.read button',s); btn.setAttribute('aria-pressed', on?'true':'false'); btn.textContent = on ? 'Прочитано ✓' : 'Прочитано'; s.dataset.read = on ? '1':''; update(); }
-  function persist(){ var o={}; secs.forEach(function(s){ if(s.dataset.read) o[s.id]=1 }); store.set(KEY+'-read', JSON.stringify(o)); }
+  function persist(){ var o={}; secs.forEach(function(s){ if(s.dataset.read) o[s.id]=1 }); store.set(RK()+'-read', JSON.stringify(o)); }
   function update(){
     var n = secs.filter(function(s){return s.dataset.read}).length;
     $('#doneN').textContent = n; $('#barFill').style.width = (100*n/secs.length)+'%';
@@ -781,27 +807,73 @@ function boot(C){
     var all = n === secs.length, box=$('#agreeBox');
     box.disabled = !all; $('#agreeLbl').classList.toggle('locked', !all);
     if(!all){ box.checked=false; }
-    $('#agreeHint').textContent = all ? 'Все разделы отмечены. Поставьте галочку и подтвердите.' : 'Отметьте «Прочитано» во всех разделах — осталось ' + (secs.length-n) + '.';
+    $('#agreeHint').textContent = all ? 'Все разделы отмечены. Поставьте галочку и подтвердите.' : 'Нажмите «Прочитано» под каждым разделом — осталось ' + (secs.length-n) + '.';
     $('#agreeBtn').disabled = !(all && box.checked);
   }
   $('#agreeBox').addEventListener('change', update);
   $('#agreeBtn').addEventListener('click', function(){
     var at = new Date(); var stamp = at.toLocaleString('ru-RU');
-    store.set(KEY+'-accepted', at.toISOString());
+    store.set(RK()+'-accepted', at.toISOString());
     showSuccess(stamp);
-    try { if (IN_GAS) google.script.run.logRulesAccepted({version:C.version, at:at.toISOString(), ua:navigator.userAgent});
-      else if (C.apiUrl) api('api=rules&v=' + encodeURIComponent(C.version) + '&ua=' + encodeURIComponent(navigator.userAgent.slice(0,180))).catch(function(){}); } catch(e){}
+    var ver = C.version + (REG ? ' · постоянный участник' : '');
+    try { if (IN_GAS) google.script.run.logRulesAccepted({version:ver, at:at.toISOString(), ua:navigator.userAgent});
+      else if (C.apiUrl) api('api=rules&v=' + encodeURIComponent(ver) + '&ua=' + encodeURIComponent(navigator.userAgent.slice(0,180))).catch(function(){}); } catch(e){}
+    // постоянного участника после подтверждения сразу ведём в его анкету
+    if (REG && REG.formUrl) { var u = REG.formUrl; setTimeout(function(){ try { (window.top || window).location.href = u; } catch(e){ location.href = u; } }, 1500); }
   });
   function showSuccess(stamp){
     $('#acceptedAt').textContent = stamp; $('#success').hidden=false;
-    var a = $('#formLink');
-    if (C.formUrl){ a.href = C.formUrl; a.hidden=false; $('#formMissing').hidden=true; }
+    var a = $('#formLink'), url = REG ? (REG.formUrl || '') : C.formUrl;
+    a.textContent = REG ? 'Открыть анкету постоянного участника' : 'Заполнить анкету';
+    if (url){ a.href = url; a.hidden=false; $('#formMissing').hidden=true; }
     else { a.hidden=true; $('#formMissing').hidden=false; }
     $('#agreeBtn').textContent = 'Правила приняты ✓'; $('#agreeBtn').disabled = true;
   }
-  var acc = store.get(KEY+'-accepted');
-  if (acc && secs.every(function(s){return s.dataset.read})){ $('#agreeBox').checked = true; showSuccess(new Date(acc).toLocaleString('ru-RU')); }
-  update();
+  // перечитать отметки «Прочитано» для текущего режима (обычный участник / постоянный)
+  function reloadRead(){
+    var sv = {}; try{ sv = JSON.parse(store.get(RK()+'-read')||'{}') }catch(e){}
+    $('#success').hidden = true; $('#agreeBox').checked = false; $('#agreeBtn').textContent = 'Я изучил(а) все правила';
+    secs.forEach(function(s){ setRead(s, !!sv[s.id]); });
+    var acc = store.get(RK()+'-accepted');
+    if (acc && secs.every(function(s){return s.dataset.read})){ $('#agreeBox').checked = true; showSuccess(new Date(acc).toLocaleString('ru-RU')); }
+    update();
+  }
+  reloadRead();
+
+  // ── неприметное окошко: кодовое слово постоянного участника ──
+  // Слово проверяет сервер по листу «Постоянные авторы» (в коде страницы слов нет). После входа страница та же,
+  // меняются стоимость (раздел 4) и анкета в конце: постоянного участника ведём в его Google-форму.
+  var QKEY = 'll-reg-word';
+  var sess = {get:function(){try{return sessionStorage.getItem(QKEY)}catch(e){return null}}, set:function(v){try{sessionStorage.setItem(QKEY,v)}catch(e){}}, del:function(){try{sessionStorage.removeItem(QKEY)}catch(e){}}};
+  function enterReg(r, word){
+    REG = r; regOpen = true; sess.set(word);
+    document.body.classList.add('is-reg');
+    var nm = String(r.name||'').trim(); nm = nm ? nm.charAt(0).toUpperCase() + nm.slice(1) : '';
+    $('#regBarHello').textContent = nm ? nm + ', здравствуйте!' : 'Здравствуйте!';
+    $('#quietForm').hidden = true;
+    st.reg = true; renderCalc(); setStamp(); reloadRead();
+  }
+  function leaveReg(){
+    REG = null; regOpen = false; sess.del();
+    document.body.classList.remove('is-reg');
+    $('#quietForm').hidden = (C.hasRegular === false); $('#quietIn').value = '';
+    st.reg = false; renderCalc(); setStamp(); reloadRead();
+  }
+  $('#regBarOut').addEventListener('click', function(){ leaveReg(); window.scrollTo(0, 0); });
+  $('#quietForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var f = $('#quietForm'), inp = $('#quietIn'), w = inp.value;
+    if (!norm(w) || f.classList.contains('busy')) return;
+    f.classList.add('busy'); f.classList.remove('no'); inp.readOnly = true;
+    checkCode('', '', w).then(function(r){
+      f.classList.remove('busy'); inp.readOnly = false;
+      if (r && r.ok) { inp.value = ''; inp.blur(); enterReg(r, w); $('#regBar').scrollIntoView({behavior:'smooth', block:'start'}); }
+      else { inp.value = ''; void f.offsetWidth; f.classList.add('no'); }
+    });
+  });
+  // вкладку обновили — постоянный участник остаётся в своём режиме (слово живёт только до закрытия вкладки)
+  var w0 = sess.get();
+  if (w0) checkCode('', '', w0).then(function(r){ if (r && r.ok) enterReg(r, w0); else sess.del(); });
 
   // копирование ников
   $$('[data-copy]').forEach(function(b){ b.addEventListener('click', function(){
