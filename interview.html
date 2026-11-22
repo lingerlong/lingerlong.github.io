@@ -113,7 +113,7 @@ textarea:focus{border-color:var(--fg)}
   <header class="top">
     <div class="mark" aria-label="Linger Long"><span class="l1">LINGER</span><span class="l2">long</span></div>
     <div class="tools">
-      <span class="pill sky" id="issuePill">[ выпуск ]</span>
+      <span class="pill sky" id="issuePill">[ альбом ]</span>
       <span class="pill pink" id="modePill" hidden>[ демо ]</span>
       <button class="ghost" id="themeBtn" type="button">Тема</button>
     </div>
@@ -122,7 +122,7 @@ textarea:focus{border-color:var(--fg)}
   <section class="intro" id="intro">
     <div>
       <div class="name" id="authorName">…</div>
-      <p id="introText">Это ваше интервью для журнала. Отвечайте так, как рассказали бы другу на кухне: с местами, именами, запахами и датами, и не экономьте слова — в номер попадёт лучшая половина, остальное поможет нам выбрать. Справа будет подсказывать редактор, но в текст попадут только ваши слова.</p>
+      <p id="introText">Это ваше интервью для альбома. Отвечайте так, как рассказали бы другу на кухне: с местами, именами, запахами и датами, и не экономьте слова — на ваши страницы попадёт лучшая половина, остальное поможет нам выбрать. Рядом с каждым вопросом появляются подсказки: нажмите «Подсказать» или просто сделайте паузу. В текст попадут только ваши слова.</p>
     </div>
     <div class="pill" id="progressPill">[ 0 из 0 ]</div>
   </section>
@@ -131,7 +131,7 @@ textarea:focus{border-color:var(--fg)}
     <nav class="toc" aria-label="Вопросы">
       <h2>Вопросы</h2>
       <ol id="toc"></ol>
-      <div class="meta">Черновик сохраняется на этом устройстве сам. «Сохранить» отправляет ответ в редакцию.</div>
+      <div class="meta">Черновик сохраняется на этом устройстве сам. «Сохранить» отправляет ответ команде проекта.</div>
     </nav>
 
     <main class="sheet" id="sheet">
@@ -151,8 +151,8 @@ textarea:focus{border-color:var(--fg)}
       <div class="status" id="status" aria-live="polite"></div>
     </main>
 
-    <aside class="margin" aria-label="Подсказки редактора">
-      <h2>Шёпот редактора</h2>
+    <aside class="margin" aria-label="Подсказки">
+      <h2>Подсказки</h2>
       <div class="whisper" id="whisper"><div class="empty">Начните писать. Когда остановитесь, здесь появится наводящий вопрос. Или нажмите «Подсказать».</div></div>
       <div class="note">Подсказки не попадают в интервью. Их задача только одна: помочь вспомнить деталь, которую вы бы иначе пропустили.</div>
     </aside>
@@ -160,14 +160,14 @@ textarea:focus{border-color:var(--fg)}
 
   <section class="done-screen" id="finishBox" hidden>
     <h2>Всё на месте</h2>
-    <p id="finishText">Все ответы сохранены. Если хотите, отправьте интервью в редакцию: мы бережно сократим лишнее, не меняя ваших слов, и пришлём вам на согласование.</p>
+    <p id="finishText">Все ответы сохранены. Если хотите, отправьте интервью нам: мы бережно сократим лишнее, не меняя ваших слов, и пришлём вам на согласование.</p>
     <div class="actions" style="justify-content:center;margin-top:14px">
-      <button type="button" id="finishBtn" class="red">Отправить в редакцию</button>
+      <button type="button" id="finishBtn" class="red">Отправить интервью</button>
       <button type="button" id="backBtn">Вернуться к ответам</button>
     </div>
   </section>
 
-  <p class="foot" id="foot">Ваши ответы хранятся в закрытой папке редакции Linger Long на Google Диске и не публикуются без вашего согласования. Передача данных Google и ИИ-подсказчику происходит за пределами Беларуси (трансграничная передача, ст. 9 Закона № 99-З). Редакция не публикует без согласия ничего, что вы сочтёте личным.</p>
+  <p class="foot" id="foot">Ваши ответы хранятся в закрытой папке проекта Linger Long на Google Диске и не публикуются без вашего согласования. Передача данных Google и ИИ-подсказчику происходит за пределами Беларуси (трансграничная передача, ст. 9 Закона № 99-З). Мы не публикуем без вашего согласия ничего, что вы сочтёте личным. Вопросы — в Telegram: <a href="https://t.me/yuliyakobyzeva" target="_blank" rel="noopener">@yuliyakobyzeva</a>.</p>
 </div>
 
 <script>
@@ -184,7 +184,7 @@ const DEMO = !TOKEN || params.get('demo') === '1';
 
 /* ---------- демо-данные (показывают, как выглядит интервью без бэкенда) ---------- */
 const DEMO_DATA = {
-  name: 'Анна', fullName: 'Анна Матесович', issue: 'Зимний выпуск · 18', status: 'в работе',
+  name: 'Анна', fullName: 'Анна Матесович', issue: 'Бенгальские огни', status: 'в работе',
   questions: [
     { id:'q1', text:'Какой предмет из вашей мастерской вы бы не продали ни за какие деньги? Расскажите его историю.', lead:'Не о ремесле вообще, а об одной вещи: откуда она, кто её трогал, что с ней было.', goal:1500,
       seeds:['первая форма для бетона, которую вы отлили в 2018-м','чашка, которую подарил Роман','предмет, который сломался, но вы его оставили'] },
@@ -224,7 +224,7 @@ async function load(){
     try{
       const r = await fetch(CFG.API + '?api=interview&t=' + encodeURIComponent(TOKEN), {redirect:'follow'});
       data = await r.json(); if (data.error) throw new Error(data.error);
-    }catch(e){ $('#introText').textContent = 'Не удалось открыть интервью: ' + e.message + '. Напишите редакции, мы пришлём новую ссылку.'; return; }
+    }catch(e){ $('#introText').textContent = 'Не удалось открыть интервью: ' + e.message + '. Напишите нам в Telegram @yuliyakobyzeva, мы пришлём новую ссылку.'; return; }
   }
   const local = loadLocal();
   for (const k in local){ if (!data.answers[k] || (local[k].updated||0) > (data.answers[k].updated||0)) data.answers[k] = local[k]; }
@@ -256,7 +256,7 @@ function show(i){
   cur = i; const q = data.questions[i]; const a = data.answers[q.id]||{};
   el.qLabel.textContent = 'Вопрос ' + (i+1) + ' из ' + data.questions.length;
   el.qText.textContent = q.text; el.qLead.textContent = q.lead||''; el.goal.textContent = q.goal||1500;
-  el.ta.value = a.text||''; updateCount(); el.status.textContent = a.done ? 'Сохранено в редакцию ✓' : '';
+  el.ta.value = a.text||''; updateCount(); el.status.textContent = a.done ? 'Сохранено и отправлено ✓' : '';
   el.whisper.innerHTML = ''; (hintsShown[q.id]||[]).forEach(h => addHint(h, false));
   if (!el.whisper.children.length) el.whisper.innerHTML = '<div class="empty">Начните писать. Когда остановитесь, здесь появится наводящий вопрос. Или нажмите «Подсказать».</div>';
   renderToc(); $('#nextBtn').textContent = i === data.questions.length-1 ? 'К финалу →' : 'Дальше →';
@@ -288,13 +288,13 @@ function addHint(h, remember=true){
 }
 async function requestHints(auto){
   if (busy) return; busy = true; const q = data.questions[cur];
-  $('#hintBtn').disabled = true; if (!auto) el.status.textContent = 'Редактор думает…';
+  $('#hintBtn').disabled = true; if (!auto) el.status.textContent = 'Подбираю подсказку…';
   try{
     const prev = (hintsShown[q.id]||[]).map(h => h.text);
     const payload = { action:'hint', qid:q.id, text: el.ta.value, prev, auto: !!auto };
     let r;
     try { r = await api(payload); }
-    catch(e1){ if (!auto) el.status.textContent = 'Редактор задумался, ещё секунду…'; await new Promise(res => setTimeout(res, 4000)); r = await api(payload); }
+    catch(e1){ if (!auto) el.status.textContent = 'Ещё секунду…'; await new Promise(res => setTimeout(res, 4000)); r = await api(payload); }
     const list = auto ? r.hints.slice(0,1) : r.hints.slice(0,3);
     list.forEach(h => addHint(Object.assign({auto:!!auto}, h)));
     if (!auto) el.status.textContent = '';
@@ -340,7 +340,7 @@ $('#saveBtn').onclick = async () => {
   stash(); const q = data.questions[cur]; const a = data.answers[q.id];
   if (!a.text.trim()){ el.status.textContent = 'Пока нечего сохранять.'; return; }
   $('#saveBtn').disabled = true; el.status.textContent = 'Сохраняем…';
-  try{ await api({action:'save', qid:q.id, text:a.text}); a.done = true; a.updated = Date.now(); saveLocal(); el.status.textContent = 'Сохранено в редакцию ✓'; renderToc(); toast('Сохранено'); }
+  try{ await api({action:'save', qid:q.id, text:a.text}); a.done = true; a.updated = Date.now(); saveLocal(); el.status.textContent = 'Сохранено и отправлено ✓'; renderToc(); toast('Сохранено'); }
   catch(e){ el.status.textContent = 'Не сохранилось: ' + e.message + '. Текст остался на этом устройстве.'; }
   $('#saveBtn').disabled = false;
 };
@@ -355,7 +355,7 @@ $('#finishBtn').onclick = async () => {
 };
 function showFinished(){
   el.app.hidden = true; el.finishBox.hidden = false; $('#finishBtn').hidden = true; $('#backBtn').hidden = true;
-  $('#finishBox h2').textContent = 'Спасибо!'; $('#finishText').textContent = 'Интервью у редакции. Мы пришлём вам текст на согласование до вёрстки.';
+  $('#finishBox h2').textContent = 'Спасибо!'; $('#finishText').textContent = 'Интервью у нас. Мы пришлём вам текст на согласование до вёрстки.';
 }
 function toast(t){ const d = document.createElement('div'); d.className='toast'; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),1800); }
 
